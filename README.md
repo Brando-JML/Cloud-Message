@@ -42,4 +42,4 @@ Este proyecto se gestiona utilizando la metodología ágil **Scrum**, con Sprint
 * [Brando Josue Molina Lanche]
 * [Karla Antonieta Barrera Nava]
 * [Cesar Benitez Fabian]
-* [Daniel Casarrubias Godinez]
+* [Francisco Daniel Casarrubias Godinez]

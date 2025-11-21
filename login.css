@@ -1,0 +1,206 @@
+/* Fondo y centrado del contenido */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url(img.jpg) no-repeat;
+    background-size: cover;
+    background-position: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Caja del formulario */
+.wrapper {
+    width: 420px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 60px 40px;
+    transition: 0.3s ease;
+}
+
+/* Efecto de resplandor al pasar el mouse */
+.wrapper:hover {
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
+}
+
+/* Título */
+.wrapper h1 {
+    font-size: 36px;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+/* Contenedor de cada input */
+.wrapper .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px; 
+    margin: 40px 0; 
+}
+/* Inputs */
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px;
+    outline: none;
+    font-size: 16px;
+    color: #fff;
+    padding: 0 45px 0 20px; /* centrado vertical correcto */
+    line-height: 50px; /* nuevo: centra el texto sin hacer más alto el input */
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Efecto visual en hover o foco */
+.input-box input:focus,
+.input-box input:hover {
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Color del placeholder */
+.input-box input::placeholder {
+    color: #f1f1f1;
+}
+
+/* Iconos dentro del input */
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #fff;
+}
+
+/* Recordarme y olvidó contraseña */
+.wrapper .remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: 10px 0 25px;
+}
+
+.remember-forgot label input {
+    accent-color: #fff;
+    margin-right: 3px;
+}
+
+.remember-forgot a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.remember-forgot a:hover {
+    text-decoration: underline;
+}
+
+/* Botón */
+.wrapper .btn {
+    width: 100%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    transition: 0.3s ease;
+    margin-top: 20px;  /* separa del bloque de arriba */
+    margin-bottom: 25px; /* separa del texto de registro */
+}
+
+/* Efecto al pasar el mouse sobre el botón */
+.wrapper .btn:hover {
+    background: #f0f0f0;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Enlace para registrarse */
+.wrapper .register-link {
+    font-size: 14px;
+    text-align: center;
+    margin: 20px 0 15px;
+}
+
+.register-link p a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link p a:hover {
+    text-decoration: underline;
+}
+
+
+        /* Estilos adicionales para validaciones */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .input-box.error input {
+            border-color: #ff6b6b !important;
+            box-shadow: 0 0 10px rgba(255, 50, 50, 0.4) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .shake {
+            animation: shake 0.15s ease-in-out;
+        }
+
+        .btn-loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        .wrapper .btn {
+            position: relative;
+        }

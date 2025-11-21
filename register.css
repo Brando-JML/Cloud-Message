@@ -1,0 +1,401 @@
+/* Fondo y centrado del contenido */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url(img.jpg) no-repeat;
+    background-size: cover;
+    background-position: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Caja del formulario */
+.wrapper {
+    width: 850px; /* más ancho para evitar scroll vertical */
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 50px;
+    transition: 0.3s ease;
+}
+
+.wrapper:hover {
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
+}
+
+.wrapper h1 {
+    font-size: 36px;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+/* Diseño en dos columnas */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px 40px;
+}
+
+/* Input boxes */
+.input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+}
+
+/* Inputs y selects */
+.input-box input,
+.input-box select {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px;
+    outline: none;
+    font-size: 16px;
+    color: #fff;
+    padding: 0 45px 0 20px;
+    line-height: 50px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    appearance: none;
+}
+
+.input-box select option {
+    color: #222;            /* texto oscuro para que sea legible */
+    background: #fff;       /* fondo claro */
+}
+
+/* opcional: mejora visual al pasar el ratón (no soportado en todos los navegadores) */
+.input-box select option:hover {
+    background: #f0f0f0;
+}
+
+/* Hover y focus */
+.input-box input:focus,
+.input-box input:hover,
+.input-box select:focus,
+.input-box select:hover {
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Placeholder */
+.input-box input::placeholder {
+    color: #f1f1f1;
+}
+
+/* Íconos */
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #fff;
+}
+
+/* Botón */
+.wrapper .btn {
+    display: block; 
+    width: 40%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    transition: 0.3s ease;
+    margin: 35px auto 0;      /* centra horizontalmente */
+}
+
+.wrapper .btn:hover {
+    background: #f0f0f0;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Enlace inferior */
+.register-link {
+    font-size: 14px;
+    text-align: center;
+    margin: 20px 0 10px;
+}
+
+.register-link p a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link p a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para custom select */
+.custom-select {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 40px;
+    padding: 0 45px 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    outline: none;
+}
+
+.custom-select .selected {
+    line-height: 50px;
+    font-size: 16px;
+}
+
+.custom-select .chevron {
+    font-size: 18px;
+    color: #fff;
+    margin-right: 8px;
+}
+
+/* lista de opciones desplegada */
+.custom-select .options {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 10px);
+    background: #fff;
+    color: #222;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    max-height: 180px;
+    overflow-y: auto;
+    display: none; /* visible cuando .open */
+    z-index: 50;
+    padding: 6px 0;
+}
+
+/* visible cuando abierto */
+.custom-select.open .options {
+    display: block;
+}
+
+/* opción */
+.custom-select .options li {
+    padding: 10px 16px;
+    cursor: pointer;
+    list-style: none;
+    white-space: nowrap;
+}
+
+.custom-select .options li:hover,
+.custom-select .options li[aria-selected="true"] {
+    background: #f0f0f0;
+}
+
+/* opcional: ajustar el icono que está dentro de .input-box para que no se sobreponga */
+.input-box.select-box .bx-male-female {
+    right: 45px;
+}
+
+/* ocultar indicador nativo (fallback) */
+input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* control visual de fecha */
+.custom-date {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 40px;
+    padding: 0 45px 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    outline: none;
+}
+.custom-date .date-display {
+    line-height: 50px;
+    font-size: 16px;
+}
+
+/* calendario desplegable */
+.calendar {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 10px);
+    width: 320px;
+    background: #fff;
+    color: #222;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    z-index: 60;
+    padding: 10px;
+    display: none;
+}
+
+/* muestra control cuando aria-hidden=false */
+.calendar[aria-hidden="false"] {
+    display: block;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.calendar-header .month-year {
+    text-transform: capitalize;
+    font-weight: 600;
+}
+.calendar-header button {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.calendar-header button:hover {
+    background: #f0f0f0;
+}
+
+/* días */
+.calendar-body .day-names,
+.calendar-body .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.calendar-body .day-names div {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+}
+.day {
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+.day.empty {
+    visibility: hidden;
+}
+.day:hover {
+    background: #f0f0f0;
+}
+.day.selected {
+    background: #e6e6e6;
+    font-weight: 600;
+}
+/* ajustar tamaño para mobile si hace falta */
+@media (max-width: 520px) {
+    .calendar { width: 260px; }
+}
+
+.calendar-header .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.calendar-header .month-select,
+.calendar-header .year-select {
+    background: transparent;
+    border: none;
+    color: #222;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.calendar { z-index: 999; } /* asegurar por encima de otros elementos */
+
+/* Estilos adicionales para mensajes de error y validaciones */
+    .error-message {
+    text-align: center;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    min-height: 20px;
+}
+
+   .error-message.show {
+      display: block;
+    }
+
+    /* Estados de error y éxito para inputs */
+    .input-box.error input,
+    .input-box.error .custom-select,
+    .input-box.error .custom-date {
+      border-color: #ff6b6b !important;
+      box-shadow: 0 0 10px rgba(255, 50, 50, 0.4) !important;
+    }
+
+    .input-box.success input,
+    .input-box.success .custom-select,
+    .input-box.success .custom-date {
+      border-color: #51cf66 !important;
+      box-shadow: 0 0 10px rgba(81, 207, 102, 0.3) !important;
+    }
+
+    /* Animación de shake para errores */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .shake {
+      animation: shake 0.15s ease-in-out;
+    }
+
+    /* Estado de carga del botón */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn-loading::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid #333;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spinner 0.6s linear infinite;
+    }
+
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }

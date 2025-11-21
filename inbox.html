@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandeja de Entrada - CloudMessage</title>
+  <link rel="stylesheet" href="inbox.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  
+</head>
+
+<body>
+  <div class="wrapper correo-wrapper">
+    <header class="header">
+      <div class="header__left">
+        <span class="material-icons">menu</span>
+        <h1 class="app-title">CloudMessage</h1>
+      </div>
+
+      <div class="header__middle">
+        <span class="material-icons">search</span>
+        <input type="text" placeholder="Buscar correo..." />
+      </div>
+
+      <div class="header__right">
+        <div class="user-menu">
+          <span class="material-icons account-circle-btn" id="accountBtn">account_circle</span>
+          
+          <!-- Menú desplegable -->
+          <div class="user-menu-dropdown" id="userMenu">
+            <div class="user-info">
+              <div class="user-name" id="userName">Cargando...</div>
+              <div class="user-email" id="userEmail">Cargando...</div>
+            </div>
+            
+            <div class="menu-option logout" id="logoutBtn">
+              <span class="material-icons">logout</span>
+              <span>Cerrar sesión</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main__body">
+      <aside class="sidebar">
+        <button class="sidebar__compose">
+          <span class="material-icons">edit</span> Redactar
+        </button>
+
+        <div class="sidebarOption sidebarOption__active">
+          <span class="material-icons">inbox</span>
+          <h3>Bandeja de entrada</h3>
+        </div>
+
+        <div class="sidebarOption">
+          <span class="material-icons">send</span>
+          <h3>Enviados</h3>
+        </div>
+
+        <div class="sidebarOption">
+          <span class="material-icons">drafts</span>
+          <h3>Borradores</h3>
+        </div>
+      </aside>
+
+      <!-- Correos recibidos -->
+      <section class="emailList active">
+        <div class="emailList__settings">
+          <h2>Correos recientes</h2>
+        </div>
+
+        <div class="emailList__list">
+          <div class="emailRow">
+            <div class="emailRow__summary">
+              <p class="emailRow__from"><strong>De:</strong> Admin</p>
+              <p class="emailRow__subject"><strong>Asunto:</strong> Bienvenida al sistema</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="emailRow__body hide">
+              <p>¡Hola! Bienvenido al sistema CloudMessage. Aquí podrás enviar, recibir y guardar tus correos
+                fácilmente. Si necesitas ayuda, contáctanos en soporte@cloudmessage.com.</p>
+            </div>
+          </div>
+
+          <div class="emailRow">
+            <div class="emailRow__summary">
+              <p class="emailRow__from"><strong>De:</strong> Sistema</p>
+              <p class="emailRow__subject"><strong>Asunto:</strong> Recordatorio de mantenimiento</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="emailRow__body hide">
+              <p>Este es un recordatorio de que el sistema estará en mantenimiento mañana a las 9:00 AM. Durante ese
+                tiempo no podrás acceder a tu bandeja. Gracias por tu comprensión.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Correos enviados -->
+      <section class="sentList hide">
+        <div class="emailList__settings">
+          <h2>Correos enviados</h2>
+        </div>
+
+        <div class="emailList__list">
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> usuario@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Bienvenida</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Hola, este es un correo de bienvenida al sistema. ¡Esperamos que lo disfrutes!</p>
+            </div>
+          </div>
+
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> soporte@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Reporte de error</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Se ha detectado un error en la aplicación. Favor de revisarlo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Borradores -->
+      <section class="draftList hide">
+        <div class="emailList__settings">
+          <h2>Borradores</h2>
+        </div>
+
+        <div class="emailList__list">
+          <!-- Borrador 1 -->
+          <div class="draftRow" data-draft-id="1">
+            <div class="draftRow__summary">
+              <div class="draftRow__info">
+                <p class="draftRow__to"><strong>Para:</strong> <span class="draft-to-preview">cliente@example.com</span>
+                </p>
+                <p class="draftRow__subject"><strong>Asunto:</strong> <span class="draft-subject-preview">Asunto
+                    pendiente</span></p>
+              </div>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="draftRow__body hide">
+              <form class="draft-edit-form">
+                <div class="draft-field">
+                  <label>Para:</label>
+                  <input type="email" class="draft-to-input" value="equipo@empresa.com" />
+                </div>
+                <div class="draft-field">
+                  <label>Asunto:</label>
+                  <input type="text" class="draft-subject-input" value="Reporte semanal" />
+                </div>
+                <div class="draft-field">
+                  <label>Mensaje:</label>
+                  <textarea
+                    class="draft-message-input">Adjunto el reporte semanal de actividades. Falta adjuntar el archivo final con las estadísticas completas.</textarea>
+                </div>
+
+                <div class="draft-attachments">
+                  <div class="draft-attachments-title">Archivos adjuntos:</div>
+                  <div class="attachment-list">
+                    <div class="attachment-item">
+                      <div class="attachment-info">
+                        <span class="material-icons" style="font-size: 18px;">attach_file</span>
+                        <span class="attachment-name">reporte_borrador.xlsx</span>
+                      </div>
+                      <button type="button" class="btn-remove-attachment">Eliminar</button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-add-attachment">
+                    <span class="material-icons" style="font-size: 16px;">add</span>
+                    Agregar archivo
+                  </button>
+                </div>
+
+                <div class="draft-actions">
+                  <button type="button" class="btn-cancel-draft">Cancelar</button>
+                  <button type="button" class="btn-delete-draft">Eliminar borrador</button>
+                  <button type="button" class="btn-save-draft">Guardar cambios</button>
+                  <button type="button" class="btn-send-draft">Enviar ahora</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- Redactar nuevo correo -->
+<section class="composeSection hide">
+  <div class="emailList__settings">
+    <h2>Nuevo mensaje</h2>
+  </div>
+
+  <form class="compose-form">
+    <div class="compose-field">
+      <label>Para:</label>
+      <input type="email" placeholder="ejemplo@correo.com" class="compose-input" required id="composeTo" />
+    </div>
+
+    <div class="compose-field">
+      <label>Asunto:</label>
+      <input type="text" placeholder="Asunto del mensaje" class="compose-input" required id="composeSubject"/>
+    </div>
+
+    <div class="compose-field">
+      <label>Mensaje:</label>
+      <textarea placeholder="Escribe tu mensaje..." class="compose-textarea" required id="composeMessage" ></textarea>
+    </div>
+
+    <div class="compose-attachments">
+      <div class="compose-attachments-title">Archivos adjuntos:</div>
+      <div class="attachment-list"></div>
+      <button type="button" class="btn-add-attachment">
+        <span class="material-icons" style="font-size: 16px;">add</span>
+        Agregar archivo
+      </button>
+    </div>
+
+    <div class="compose-actions">
+      <button type="button" class="btn-cancel-compose">Cancelar</button>
+      <button type="submit" class="btn-send" id="btnSendCompose">Enviar</button>
+    </div>
+  </form>
+</section>
+    </main>
+  
+  <!-- Modal de confirmación -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="material-icons modal-icon">warning</span>
+        <h3 class="modal-title">Confirmar eliminación</h3>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este borrador? Esta acción no se puede deshacer.
+      </div>
+      <div class="modal-actions">
+        <button  class="modal-btn modal-btn-borrador" id="modalBorrador">Borrador</button>
+        <button class="modal-btn modal-btn-cancel" id="modalCancel">Cancelar</button>
+        <button class="modal-btn modal-btn-confirm" id="modalConfirm">Eliminar</button>
+        
+      </div>
+    </div>
+  </div>
+
+  <!--Modal Eliminar-->
+  <div class="modal-overlay" id="modalDeleteOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="material-icons modal-icon" style="color: #d93025;">delete_outline</span>
+        <h3 class="modal-title" id="modalDeleteTitle">Eliminar correo</h3>
+      </div>
+      <div class="modal-body" id="modalDeleteBody">
+        ¿Estás seguro de que deseas eliminar este correo? Esta acción no se puede deshacer.
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="modalDeleteCancel">Cancelar</button>
+        <button class="modal-btn modal-btn-confirm" id="modalDeleteConfirm">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de notificaciones -->
+  <div id="notificationContainer"></div>
+
+  <script src="mailService.js"></script>
+
+  <!-- Configuración de Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVEltBir1JP3-Fkp28VchL8-r0VMi-LYo",
+      authDomain: "cloudmessage-73de0.firebaseapp.com",
+      projectId: "cloudmessage-73de0",
+      storageBucket: "cloudmessage-73de0.firebasestorage.app",
+      messagingSenderId: "40058388963",
+      appId: "1:40058388963:web:821cda7114279a336e20d6",
+      measurementId: "G-W0BMTSZWXC"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    console.log('🔥 Firebase inicializado');
+
+    // Variables globales
+    let currentUser = null;
+    let userData = null;
+
+    /* ==========================================
+       PROTECCIÓN DE RUTA Y CARGA DE USUARIO
+       ========================================== */
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        // No hay usuario autenticado, redirigir al login
+        console.log('⚠️ Usuario no autenticado, redirigiendo al login...');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      currentUser = user;
+      console.log('✅ Usuario autenticado:', user.uid);
+
+      try {
+        // Obtener datos del usuario desde Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+          userData = userDoc.data();
+          console.log('✅ Datos del usuario cargados:', userData);
+          
+          // Mostrar información del usuario en el header
+          document.getElementById('userName').textContent = `${userData.nombre} ${userData.apellidos}`;
+          document.getElementById('userEmail').textContent = userData.email;
+
+          await cargarCorreosDelUsuario(userData.email);
+
+        } else {
+          console.warn('⚠️ No se encontraron datos del usuario en Firestore');
+          document.getElementById('userName').textContent = user.email;
+          document.getElementById('userEmail').textContent = user.email;
+        }
+      } catch (error) {
+        console.error('❌ Error al cargar datos del usuario:', error);
+      }
+    });
+  </script>
+
+ <script>
+   // ==============================
+  // NOTIFICACIONES
+  // ==============================
+  function showNotification(title, message, type = 'info') {
+    const container = document.getElementById('notificationContainer');
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    let icon = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    notification.innerHTML = `
+      <span class="material-icons notification-icon">${icon}</span>
+      <div class="notification-content">
+        <div class="notification-title">${title}</div>
+        <div class="notification-message">${message}</div>
+      </div>`;
+    container.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => { notification.classList.remove('show'); setTimeout(() => notification.remove(), 400); }, 3500);
+  }
+
+  // ==============================
+  // MODAL DE CONFIRMACIÓN
+  // ==============================
+  function showConfirmModalCustom({ title, message, confirmText = 'Aceptar', cancelText = 'Cancelar' }, onConfirm) {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = modalOverlay.querySelector('.modal-title');
+    const modalBody = modalOverlay.querySelector('.modal-body');
+    const btnConfirm = modalOverlay.querySelector('#modalConfirm');
+    const btnCancel = modalOverlay.querySelector('#modalCancel');
+
+    modalTitle.textContent = title;
+    modalBody.textContent = message;
+    btnConfirm.textContent = confirmText;
+    btnCancel.textContent = cancelText;
+
+    modalOverlay.classList.add('show');
+
+    const cleanUp = () => modalOverlay.classList.remove('show');
+
+    btnCancel.onclick = () => cleanUp();
+    btnConfirm.onclick = () => { cleanUp(); onConfirm(); };
+
+    modalOverlay.onclick = (e) => { if (e.target === modalOverlay) cleanUp(); };
+  }
+
+  // ==============================
+  // MODAL DE CONFIRMACIÓN (SOLO PARA ELIMINAR)
+  // ==============================
+  function showDeleteConfirmModal({ title, message }, onConfirm) {
+    const modalOverlay = document.getElementById('modalDeleteOverlay');
+    const modalTitle = modalOverlay.querySelector('#modalDeleteTitle');
+    const modalBody = modalOverlay.querySelector('#modalDeleteBody');
+    const btnConfirm = modalOverlay.querySelector('#modalDeleteConfirm');
+    const btnCancel = modalOverlay.querySelector('#modalDeleteCancel');
+
+    modalTitle.textContent = title;
+    modalBody.textContent = message;
+
+    modalOverlay.classList.add('show');
+
+    // Creamos funciones de limpieza para evitar duplicar listeners
+    const cleanUp = () => {
+      modalOverlay.classList.remove('show');
+      // Importante: usamos .cloneNode(true) para remover todos los listeners antiguos
+      btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+      btnCancel.replaceWith(btnCancel.cloneNode(true));
+      modalOverlay.replaceWith(modalOverlay.cloneNode(true));
+    };
+    
+    
+    document.getElementById('modalDeleteCancel').onclick = () => cleanUp();
+    document.getElementById('modalDeleteConfirm').onclick = () => { 
+      cleanUp(); 
+      onConfirm(); 
+    };
+    document.getElementById('modalDeleteOverlay').onclick = (e) => { 
+      if (e.target === document.getElementById('modalDeleteOverlay')) cleanUp(); 
+    };
+  }
+
+  // ==============================
+  // MENÚ DE USUARIO
+  // ==============================
+  const accountBtn = document.getElementById('accountBtn');
+  const userMenu = document.getElementById('userMenu');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  accountBtn.addEventListener('click', e => { e.stopPropagation(); userMenu.classList.toggle('show'); });
+  document.addEventListener('click', e => { if (!userMenu.contains(e.target) && e.target !== accountBtn) userMenu.classList.remove('show'); });
+  logoutBtn.addEventListener('click', async () => {
+    await auth.signOut();
+    showNotification('Sesión cerrada', 'Has cerrado sesión exitosamente', 'success');
+    setTimeout(() => window.location.href = 'login.html', 1000);
+  });
+
+  // ==============================
+  // VARIABLES PRINCIPALES
+  // ==============================
+  const composeBtn = document.querySelector('.sidebar__compose');
+  const composeSection = document.querySelector('.composeSection');
+  const composeForm = composeSection.querySelector('.compose-form');
+  const cancelCompose = composeSection.querySelector('.btn-cancel-compose');
+  const composeAttachmentList = composeSection.querySelector('.attachment-list');
+  const sidebarOptions = document.querySelectorAll('.sidebarOption');
+  let isComposing = false;
+  let pendingSection = null;
+
+  const sections = {
+    inbox: document.querySelector('.emailList'),
+    sent: document.querySelector('.sentList'),
+    drafts: document.querySelector('.draftList'),
+    compose: composeSection
+  };
+
+  // ==============================
+  // NAVEGACIÓN ENTRE SECCIONES
+  // ==============================
+  function navigateToSection(sectionKey) {
+    Object.values(sections).forEach(sec => sec.classList.add('hide') && sec.classList.remove('active'));
+    sidebarOptions.forEach(o => o.classList.remove('sidebarOption__active'));
+
+    if (sectionKey === 'compose') {
+      composeSection.classList.remove('hide');
+      composeSection.classList.add('active');
+      isComposing = true;
+    } else {
+      sections[sectionKey].classList.remove('hide');
+      sections[sectionKey].classList.add('active');
+      if (sectionKey === 'inbox') sidebarOptions[0].classList.add('sidebarOption__active');
+      if (sectionKey === 'sent') sidebarOptions[1].classList.add('sidebarOption__active');
+      if (sectionKey === 'drafts') sidebarOptions[2].classList.add('sidebarOption__active');
+      isComposing = false;
+    }
+  }
+
+  function attemptNavigate(sectionKey) {
+    if (isComposing) {
+      pendingSection = sectionKey;
+      showConfirmModalCustom({
+        title: '¿Deseas salir de la redacción?',
+        message: 'Si sales, se perderá el mensaje que estás escribiendo.',
+        confirmText: 'Salir',
+        cancelText: 'Seguir escribiendo'
+      }, () => {
+        composeForm.reset();
+        composeAttachmentList.innerHTML = '';
+        isComposing = false;
+        navigateToSection(pendingSection);
+        pendingSection = null;
+      });
+    } else {
+      navigateToSection(sectionKey);
+    }
+  }
+
+  sidebarOptions[0].addEventListener('click', () => attemptNavigate('inbox'));
+  sidebarOptions[1].addEventListener('click', () => attemptNavigate('sent'));
+  sidebarOptions[2].addEventListener('click', () => attemptNavigate('drafts'));
+  composeBtn.addEventListener('click', () => attemptNavigate('compose'));
+
+  cancelCompose.addEventListener('click', e => {
+    e.preventDefault();
+    showConfirmModalCustom({
+      title: '¿Deseas salir de la redacción?',
+      message: 'Si sales, se perderá el mensaje que estás escribiendo.',
+      confirmText: 'Salir',
+      cancelText: 'Seguir escribiendo'
+    }, () => {
+      composeForm.reset();
+      composeAttachmentList.innerHTML = '';
+      isComposing = false;
+      navigateToSection('inbox');
+    });
+  });
+
+  // ==============================
+  // ENVIAR CORREO
+  // ==============================
+  composeForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const to = composeForm.querySelector('input[type="email"]').value.trim();
+    const subject = composeForm.querySelector('input[type="text"]').value.trim();
+    const body = composeForm.querySelector('textarea').value.trim();
+
+    if (!to || !subject) return showNotification('Campos incompletos', 'Por favor completa el destinatario y el asunto.', 'error');
+
+    showNotification('Correo enviado', `Tu mensaje fue enviado a ${to}`, 'success');
+    composeForm.reset();
+    composeAttachmentList.innerHTML = '';
+    isComposing = false;
+    navigateToSection('sent');
+  });
+
+  // ==============================
+  // ADJUNTAR ARCHIVOS EN REDACTAR
+  // ==============================
+  composeSection.querySelector('.btn-add-attachment').addEventListener('click', e => {
+    e.preventDefault();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (ev) => {
+      const file = ev.target.files[0];
+      if (file) {
+        const item = document.createElement('div');
+        item.className = 'attachment-item';
+        item.innerHTML = `
+          <div class="attachment-info">
+            <span class="material-icons" style="font-size: 18px;">attach_file</span>
+            <span class="attachment-name">${file.name}</span>
+          </div>
+          <button type="button" class="btn-remove-attachment">Eliminar</button>
+        `;
+        item.querySelector('.btn-remove-attachment').addEventListener('click', () => item.remove());
+        composeAttachmentList.appendChild(item);
+      }
+    };
+    input.click();
+  });
+
+  // ==============================
+  // FUNCIONES GENERALES PARA EXPANDIBLE Y BORRADORES
+  // ==============================
+  function makeExpandable(selector, bodySelector) {
+    document.querySelectorAll(selector).forEach(row => {
+      const body = row.querySelector(bodySelector);
+      const icon = row.querySelector('.toggle-content');
+      if (!body) return;
+      body.classList.add('hide');
+      row.addEventListener('click', e => {
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) return;
+        document.querySelectorAll(bodySelector).forEach(b => { if (b !== body) { b.classList.add('hide'); b.classList.remove('open'); } });
+        document.querySelectorAll('.toggle-content').forEach(i => i.classList.remove('expanded'));
+        const isOpen = body.classList.contains('open');
+        if (isOpen) { body.classList.add('hide'); body.classList.remove('open'); if (icon) icon.classList.remove('expanded'); }
+        else { body.classList.remove('hide'); void body.offsetWidth; body.classList.add('open'); if (icon) icon.classList.add('expanded'); }
+      });
+    });
+  }
+
+  makeExpandable('.emailRow', '.emailRow__body');
+  makeExpandable('.sentRow', '.sentRow__body');
+  makeExpandable('.draftRow', '.draftRow__body');
+
+  // ==============================
+  // BORRADORES (Archivos y botones)
+  // ==============================
+  document.querySelectorAll('.draftRow').forEach(draftRow => {
+    const toInput = draftRow.querySelector('.draft-to-input');
+    const subjectInput = draftRow.querySelector('.draft-subject-input');
+    const toPreview = draftRow.querySelector('.draft-to-preview');
+    const subjectPreview = draftRow.querySelector('.draft-subject-preview');
+    const body = draftRow.querySelector('.draftRow__body');
+    const icon = draftRow.querySelector('.toggle-content');
+    const attachmentList = draftRow.querySelector('.attachment-list');
+
+    // Actualizar previews
+    toInput?.addEventListener('input', e => toPreview.textContent = e.target.value || 'Sin destinatario');
+    subjectInput?.addEventListener('input', e => subjectPreview.textContent = e.target.value || 'Sin asunto');
+
+    // Guardar borrador
+    draftRow.querySelector('.btn-save-draft')?.addEventListener('click', e => {
+      e.preventDefault();
+      showNotification('Guardado exitoso', 'Los cambios del borrador se han guardado correctamente.', 'success');
+      body.classList.add('hide'); body.classList.remove('open'); icon.classList.remove('expanded');
+    });
+
+    // Cancelar edición
+    draftRow.querySelector('.btn-cancel-draft')?.addEventListener('click', e => {
+      e.preventDefault();
+      body.classList.add('hide'); body.classList.remove('open'); icon.classList.remove('expanded');
+    });
+
+    // Enviar borrador
+    draftRow.querySelector('.btn-send-draft')?.addEventListener('click', e => {
+      e.preventDefault();
+      const to = toInput?.value || '';
+      const subject = subjectInput?.value || '';
+      if (to && subject) {
+        showNotification('Correo enviado', `Tu correo ha sido enviado exitosamente a ${to}`, 'success');
+        setTimeout(() => {
+          draftRow.remove();
+        }, 500);
+      } else showNotification('Campos incompletos', 'Por favor completa destinatario y asunto.', 'error');
+    });
+
+    // Eliminar borrador
+    draftRow.querySelector('.btn-delete-draft')?.addEventListener('click', e => {
+      e.preventDefault();
+      showDeleteConfirmModal({
+        title: '¿Eliminar borrador?',
+        message: 'Esta acción no se puede deshacer.',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar'
+      }, () => { draftRow.remove(); showNotification('Borrador eliminado', 'Borrador eliminado correctamente', 'info'); });
+    });
+
+    // Agregar archivo
+    draftRow.querySelector('.btn-add-attachment')?.addEventListener('click', e => {
+      e.preventDefault();
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.onchange = ev => {
+        const file = ev.target.files[0];
+        if (file) {
+          const item = document.createElement('div');
+          item.className = 'attachment-item';
+          item.innerHTML = `
+            <div class="attachment-info">
+              <span class="material-icons" style="font-size: 18px;">attach_file</span>
+              <span class="attachment-name">${file.name}</span>
+            </div>
+            <button type="button" class="btn-remove-attachment">Eliminar</button>
+          `;
+          item.querySelector('.btn-remove-attachment').addEventListener('click', () => item.remove());
+          attachmentList.appendChild(item);
+        }
+      };
+      input.click();
+    });
+
+    // Permitir eliminar archivos existentes por defecto
+    draftRow.querySelectorAll('.btn-remove-attachment').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const item = btn.closest('.attachment-item');
+        if (item) item.remove();
+      });
+    });
+  });
+      /* ==========================================
+         ENVIAR NUEVO CORREO (COMPOSE) - VÍA SPRING BOOT
+         ========================================== */
+      
+      // 1. Seleccionamos los elementos de la ventana de redactar
+      const btnSendCompose = document.getElementById('btnSendCompose');
+      const inputTo = document.getElementById('composeTo');
+      const inputSubject = document.getElementById('composeSubject');
+      const inputMessage = document.getElementById('composeMessage');
+      
+      // 2. Agregamos el "listener" al botón Enviar
+      // Usamos 'async' para poder usar 'await' con fetch
+      btnSendCompose.addEventListener('click', async (e) => {
+        e.preventDefault(); 
+        
+        // 3. Obtenemos los valores de los campos
+        const para = inputTo.value.trim();
+        const asunto = inputSubject.value.trim();
+        const mensaje = inputMessage.value.trim();
+
+        // 4. Validamos que no estén vacíos
+        if (!para || !asunto) {
+          showNotification('Campos incompletos', 'Debes rellenar "Para" y "Asunto".', 'error');
+          return;
+        }
+
+        // 5. Nos aseguramos de que el usuario esté cargado
+        if (!currentUser || !userData) {
+          showNotification('Error de usuario', 'No se pudieron cargar tus datos. Intenta recargar.', 'error');
+          return;
+        }
+        
+        // 6. Construimos el objeto del correo (EL JSON QUE ESPERA TU API)
+        const correoData = {
+          remitente: userData.email, // Usamos el email del usuario logueado
+          destinatario: para,
+          asunto: asunto,
+          mensaje: mensaje,
+          fecha: new Date().toISOString() // Enviamos la fecha actual como un string
+        };
+        
+        btnSendCompose.disabled = true;
+        btnSendCompose.textContent = 'Enviando...';
+
+        
+        try {                          //cuando se suba a la nube se cambiara 
+          const response = await fetch('http://localhost:8080/api/correos', {
+            method: 'POST',
+            headers: {
+              
+              'Content-Type': 'application/json'
+            },
+            // Convertimos nuestro objeto a un string de JSON
+            body: JSON.stringify(correoData) 
+          });
+
+          // Leemos la respuesta de texto (ej: "Correo guardado correctamente.")
+          const responseText = await response.text();
+
+          // Si la respuesta no fue exitosa (ej: 404, 500), lanzamos un error
+          if (!response.ok) {
+            throw new Error(responseText || 'Error del servidor');
+          }
+          
+          console.log('✅ Respuesta del backend:', responseText);
+          showNotification('Correo Enviado', `Tu mensaje para ${para} ha sido enviado.`, 'success');
+
+        
+          
+          // 1. Busca el formulario y la lista de adjuntos
+          // (Asumiendo que 'composeForm' y 'composeAttachmentList' 
+          // no están definidos globalmente, los buscamos aquí)
+          const composeForm = document.querySelector('.compose-form');
+          const composeAttachmentList = composeForm.querySelector('.attachment-list');
+
+          // 2. Resetea el formulario (borra Para, Asunto, Mensaje)
+          composeForm.reset(); 
+
+          // 3. Limpia la lista de adjuntos (si la hay)
+          if(composeAttachmentList) {
+            composeAttachmentList.innerHTML = '';
+          }
+
+          // 4. Actualiza tu variable de estado
+          
+          isComposing = false;
+
+          // 5. Navega de vuelta a la bandeja de entrada
+          
+          navigateToSection('inbox'); 
+          // ------------------------------------
+
+        } catch (error) {
+          
+          console.error('❌ Error al enviar al backend:', error);
+          showNotification('Error de conexión', 'No se pudo conectar con el servidor. ¿Está el backend corriendo?', 'error');
+        
+        } finally {
+          
+          btnSendCompose.disabled = false;
+          btnSendCompose.textContent = 'Enviar';
+        }  
+        
+      });
+
+
+      
+      /* ==========================================
+         GUARDAR NUEVO BORRADOR (COMPOSE) - VÍA SPRING BOOT
+         ========================================== */
+      
+      // 1. Seleccionamos el nuevo botón de borrador
+      const btnSaveDraft = document.getElementById('modalBorrador');
+
+      // 2. Agregamos el "listener" al botón Guardar Borrador
+      btnSaveDraft.addEventListener('click', async (e) => {
+        e.preventDefault(); 
+        
+        // 3. Obtenemos los valores de los campos
+        const para = inputTo.value.trim();
+        const asunto = inputSubject.value.trim();
+        const mensaje = inputMessage.value.trim();
+
+        // 4. (SIN VALIDACIÓN) No importa si están vacíos, es un borrador.
+        // Pero si todo está vacío, no hacemos nada.
+        if (!para && !asunto && !mensaje) {
+            showNotification('Borrador vacío', 'No hay nada que guardar.', 'info');
+            return;
+        }
+
+        // 5. Nos aseguramos de que el usuario esté cargado
+        if (!currentUser || !userData) {
+            showNotification('Error de usuario', 'No se pudieron cargar tus datos.', 'error');
+            return;
+        }
+        
+        // 6. Construimos el objeto del borrador
+        const draftData = {
+            remitente: userData.email, // El dueño del borrador
+            destinatario: para,
+            asunto: asunto,
+            mensaje: mensaje,
+            fecha: new Date().toISOString()
+        };
+        
+        btnSaveDraft.disabled = true;
+        btnSaveDraft.textContent = 'Guardando...';
+
+        try {
+            // 7. ¡AQUÍ ESTÁ EL CAMBIO! Llamamos al nuevo endpoint
+            const response = await fetch('http://localhost:8080/api/correos/borrador', { // <-- NUEVA URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(draftData) 
+            });
+
+            const responseText = await response.text();
+            if (!response.ok) throw new Error(responseText || 'Error del servidor');
+            
+            console.log('✅ Respuesta del backend:', responseText);
+            showNotification('Borrador Guardado', 'Tu borrador se ha guardado.', 'success'); // <-- NUEVO MENSAJE
+
+            // 8. Limpiamos 
+            const composeForm = document.querySelector('.compose-form');
+            const composeAttachmentList = composeForm.querySelector('.attachment-list');
+
+            composeForm.reset(); 
+            if(composeAttachmentList) composeAttachmentList.innerHTML = '';
+            
+          
+
+        } catch (error) {
+            console.error('❌ Error al guardar borrador:', error);
+            showNotification('Error de conexión', 'No se pudo guardar el borrador.', 'error');
+        } finally {
+            btnSaveDraft.disabled = false;
+            btnSaveDraft.textContent = 'Borrador';
+        }  
+      });
+</script>
+
+</body>
+</html>

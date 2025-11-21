@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CloudMessage</title>
+    <link rel="stylesheet" href="login.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <form id="loginForm">
+            <h1>Iniciar Sesión</h1>
+
+            <p class="error-message" id="errorMsg"></p>
+
+            <div class="input-box" data-field="email">
+                <input type="email" id="emailInput" placeholder="Correo electrónico" required>
+                <i class='bx bx-envelope'></i>
+            </div>
+
+            <div class="input-box" data-field="password">
+                <input type="password" id="passwordInput" placeholder="Contraseña" required>
+                <i class='bx bx-show eye-icon' id="togglePassword"></i>
+            </div>
+
+            <div class="remember-forgot">
+                <label><input type="checkbox" id="rememberMe"> Recordarme</label>
+                <a href="reset-password.html">¿Olvidó su contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn">Iniciar Sesión</button>
+
+            <div class="register-link">
+                <p>¿No tiene una cuenta? <a href="register.html">Registrarse</a></p>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Configuración de Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVEltBir1JP3-Fkp28VchL8-r0VMi-LYo",
+            authDomain: "cloudmessage-73de0.firebaseapp.com",
+            projectId: "cloudmessage-73de0",
+            storageBucket: "cloudmessage-73de0.firebasestorage.app",
+            messagingSenderId: "40058388963",
+            appId: "1:40058388963:web:821cda7114279a336e20d6",
+            measurementId: "G-W0BMTSZWXC"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        console.log('🔥 Firebase inicializado');
+
+        // Verificar si ya hay una sesión activa
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('✅ Usuario ya autenticado, redirigiendo...');
+                window.location.href = 'inbox.html';
+            }
+        });
+    </script>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const rememberMe = document.getElementById('rememberMe');
+        const errorMsg = document.getElementById('errorMsg');
+        const submitBtn = form.querySelector('.btn');
+        const togglePassword = document.getElementById('togglePassword');
+
+        /* ==========================================
+           MOSTRAR/OCULTAR CONTRASEÑA
+           ========================================== */
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Cambiar icono
+            this.classList.toggle('bx-show');
+            this.classList.toggle('bx-hide');
+        });
+
+        // Cargar "Recordarme" si existe
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedEmail = localStorage.getItem('rememberedEmail');
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                rememberMe.checked = true;
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Limpiar errores previos
+            clearErrors();
+            errorMsg.classList.remove('show');
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // Validaciones básicas
+            if (!email || !password) {
+                showError('⚠️ Por favor completa todos los campos', ['email', 'password']);
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('⚠️ Por favor ingresa un correo electrónico válido', ['email']);
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('⚠️ La contraseña debe tener al menos 6 caracteres', ['password']);
+                return;
+            }
+
+            // Mostrar loading
+            submitBtn.classList.add('btn-loading');
+            const btnText = submitBtn.textContent;
+            submitBtn.textContent = 'Iniciando sesión...';
+
+            try {
+                // Iniciar sesión con Firebase
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                console.log('✅ Login exitoso:', user.uid);
+
+                // Guardar "Recordarme"
+                if (rememberMe.checked) {
+                    localStorage.setItem('rememberedEmail', email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+
+                // Configurar persistencia
+                await auth.setPersistence(
+                    rememberMe.checked 
+                        ? firebase.auth.Auth.Persistence.LOCAL 
+                        : firebase.auth.Auth.Persistence.SESSION
+                );
+
+                // Obtener datos adicionales del usuario desde Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    console.log('✅ Datos del usuario:', userData);
+                    
+                    // Guardar nombre en sessionStorage para usar en inbox
+                    sessionStorage.setItem('userName', `${userData.nombre} ${userData.apellidos}`);
+                    sessionStorage.setItem('userEmail', userData.email);
+                }
+
+                // Mostrar éxito
+                showSuccess('✅ ¡Bienvenido! Redirigiendo...');
+
+                // Redirigir a inbox
+                setTimeout(() => {
+                    window.location.href = 'inbox.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('❌ Error de login:', error);
+
+                let errorMessage = 'Error al iniciar sesión. Intenta nuevamente.';
+
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = '⚠️ No existe una cuenta con este correo electrónico.';
+                        showError(errorMessage, ['email']);
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = '⚠️ Contraseña incorrecta.';
+                        showError(errorMessage, ['password']);
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = '⚠️ Correo electrónico inválido.';
+                        showError(errorMessage, ['email']);
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = '⚠️ Esta cuenta ha sido deshabilitada.';
+                        showError(errorMessage);
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = '⚠️ Demasiados intentos fallidos. Intenta más tarde.';
+                        showError(errorMessage);
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = '⚠️ Error de conexión. Verifica tu internet.';
+                        showError(errorMessage);
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = '⚠️ Credenciales inválidas. Verifica tu email y contraseña.';
+                        showError(errorMessage, ['email', 'password']);
+                        break;
+                    default:
+                        showError(error.message || errorMessage);
+                }
+            } finally {
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.textContent = btnText;
+            }
+        });
+
+        /* ========================================
+           FUNCIONES AUXILIARES
+           ======================================== */
+        function showError(message, fields = []) {
+            errorMsg.textContent = message;
+            errorMsg.style.color = '#ff6b6b';
+            errorMsg.style.background = 'rgba(255, 107, 107, 0.1)';
+            errorMsg.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+            errorMsg.classList.add('show');
+
+            fields.forEach(fieldName => {
+                const inputBox = document.querySelector(`[data-field="${fieldName}"]`);
+                if (inputBox) {
+                    inputBox.classList.add('error');
+                    inputBox.classList.add('shake');
+                    setTimeout(() => inputBox.classList.remove('shake'), 150);
+                }
+            });
+
+            errorMsg.classList.add('shake');
+            setTimeout(() => errorMsg.classList.remove('shake'), 150);
+        }
+
+        function showSuccess(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.color = '#51cf66';
+            errorMsg.style.background = 'rgba(81, 207, 102, 0.15)';
+            errorMsg.style.borderColor = 'rgba(81, 207, 102, 0.3)';
+            errorMsg.classList.add('show');
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.input-box').forEach(box => {
+                box.classList.remove('error');
+            });
+        }
+    </script>
+
+</body>
+</html>

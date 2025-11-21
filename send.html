@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correos Enviados</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="send.css">
+</head>
+<body>
+  <div class="wrapper correo-wrapper">
+    <header class="header">
+      <h1 class="app-title">CloudMessage - Enviados</h1>
+    </header>
+
+    <main class="main__body">
+      <section class="sentList">
+        <div class="emailList__settings">
+          <h2>Correos enviados</h2>
+        </div>
+
+        <div class="emailList__list">
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> usuario@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Bienvenida</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Hola, este es un correo de bienvenida al sistema. ¡Esperamos que lo disfrutes!</p>
+            </div>
+          </div>
+
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> soporte@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Reporte de error</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Se ha detectado un error en la aplicación. Favor de revisarlo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const sentRows = document.querySelectorAll('.sentRow');
+
+    sentRows.forEach(row => {
+      const toggle = row.querySelector('.toggle-content');
+      const body = row.querySelector('.sentRow__body');
+
+      toggle.addEventListener('click', () => {
+        body.classList.toggle('hide');
+        toggle.classList.toggle('expanded');
+      });
+    });
+  </script>
+</body>
+</html>
