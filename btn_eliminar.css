@@ -1,0 +1,63 @@
+/* ==========================================
+   ESTILOS PARA BOTONES DE ELIMINAR CORREOS
+   ========================================== */
+
+/* Botón de eliminar en correos recibidos y enviados */
+.btn-delete-email,
+.btn-delete-sent {
+  background: #d93025 !important;
+  color: white !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 13px !important;
+  font-family: 'Roboto', sans-serif !important;
+  transition: background 0.2s ease !important;
+}
+
+.btn-delete-email:hover,
+.btn-delete-sent:hover {
+  background: #c5221f !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+.btn-delete-email:active,
+.btn-delete-sent:active {
+  background: #a50e0e !important;
+  transform: scale(0.98) !important;
+}
+
+/* Contenedor del footer del correo */
+.emailRow__body > div:last-child,
+.sentRow__body > div:last-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Asegurar que el botón no expanda el correo al hacer click */
+.btn-delete-email *,
+.btn-delete-sent * {
+  pointer-events: none;
+}
+
+/* Responsive: En móviles, hacer el botón más pequeño */
+@media (max-width: 768px) {
+  .btn-delete-email,
+  .btn-delete-sent {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+  
+  .btn-delete-email .material-icons,
+  .btn-delete-sent .material-icons {
+    font-size: 14px !important;
+  }
+}

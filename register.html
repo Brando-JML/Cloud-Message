@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Sistema de Correos</title>
+  <link rel="stylesheet" href="register.css">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <form id="registerForm" action="#">
+      <h1>Crear cuenta</h1>
+
+      <div class="error-message" id="errorMsg"></div>
+
+      <div class="form-grid">
+        <!-- Nombre -->
+        <div class="input-box" data-field="firstName">
+          <input type="text" name="firstName" placeholder="Nombre" required>
+          <i class='bx bx-user'></i>
+        </div>
+
+        <!-- Apellido -->
+        <div class="input-box" data-field="lastName">
+          <input type="text" name="lastName" placeholder="Apellido" required>
+          <i class='bx bx-user'></i>
+        </div>
+
+        <!-- Correo electrónico -->
+        <div class="input-box" data-field="email">
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+          <i class='bx bx-envelope'></i>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="input-box" data-field="phone">
+          <input type="tel" name="phone" placeholder="Teléfono" required>
+          <i class='bx bx-phone'></i>
+        </div>
+
+        <!-- Fecha de nacimiento -->
+        <div class="input-box" data-field="birthdate">
+          <input type="date" name="birthdate" required style="display:none;">
+
+          <div class="custom-date" tabindex="0" aria-haspopup="dialog" aria-expanded="false">
+            <span class="date-display">Fecha de nacimiento</span>
+          </div>
+
+          <i class='bx bx-calendar'></i>
+
+          <div class="calendar" role="dialog" aria-hidden="true">
+            <div class="calendar-header">
+              <button type="button" class="prev" aria-label="Mes anterior">&lt;</button>
+              <div class="controls">
+                <select class="month-select" aria-label="Mes"></select>
+                <select class="year-select" aria-label="Año"></select>
+              </div>
+              <button type="button" class="next" aria-label="Mes siguiente">&gt;</button>
+            </div>
+            <div class="calendar-body">
+              <div class="day-names">
+                <div>Dom</div>
+                <div>Lun</div>
+                <div>Mar</div>
+                <div>Mié</div>
+                <div>Jue</div>
+                <div>Vie</div>
+                <div>Sáb</div>
+              </div>
+              <div class="days"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Género -->
+        <div class="input-box select-box" data-field="gender">
+          <select name="gender" required style="display:none;">
+            <option value="" disabled selected>Género</option>
+            <option value="masculino">Masculino</option>
+            <option value="femenino">Femenino</option>
+            <option value="otro">Otro</option>
+          </select>
+
+          <div class="custom-select" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+            <span class="selected">Género</span>
+            <i class='bx bx-chevron-down chevron'></i>
+            <ul class="options" role="listbox" aria-hidden="true">
+              <li role="option" data-value="masculino">Masculino</li>
+              <li role="option" data-value="femenino">Femenino</li>
+              <li role="option" data-value="otro">Otro</li>
+            </ul>
+          </div>
+
+          <i class='bx bx-male-female'></i>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="input-box" data-field="password">
+          <input type="password" name="password" id="password" placeholder="Contraseña" required>
+          <i class='bx bx-show eye-icon' id="togglePassword"></i>
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="input-box" data-field="confirmPassword">
+          <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirmar contraseña"
+            required>
+          <i class='bx bx-show eye-icon' id="toggleConfirmPassword"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="btn">Registrarme</button>
+
+      <div class="register-link">
+        <p>¿Ya tienes una cuenta? <a href="login.html">Iniciar sesión</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    /* ---------- TOGGLE PARA VISIBILIDAD DE PASSWORD ---------- */
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // Toggle para contraseña
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('bx-show');
+        this.classList.toggle('bx-hide');
+      });
+
+      // Toggle para confirmar contraseña
+      const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+
+      toggleConfirmPassword.addEventListener('click', function () {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        this.classList.toggle('bx-show');
+        this.classList.toggle('bx-hide');
+      });
+
+      /* ---------- CUSTOM SELECT Y CALENDARIO ---------- */
+
+      /* ---------- UTILS ---------- */
+      function onClickOutside(selector, handler) {
+        document.addEventListener('click', function (e) {
+          document.querySelectorAll(selector).forEach(function (el) {
+            if (!el.contains(e.target)) handler(el, e);
+          });
+        });
+      }
+
+      /* ---------- CUSTOM SELECT (GÉNERO) ---------- */
+      document.querySelectorAll('.custom-select').forEach(function (cs) {
+        var hidden = cs.parentElement.querySelector('select');
+        var display = cs.querySelector('.selected');
+        var options = cs.querySelector('.options');
+
+        cs.addEventListener('click', function (e) {
+          cs.classList.toggle('open');
+          var open = cs.classList.contains('open');
+          cs.setAttribute('aria-expanded', open ? 'true' : 'false');
+          options.setAttribute('aria-hidden', open ? 'false' : 'true');
+        });
+
+        options.querySelectorAll('li').forEach(function (li) {
+          li.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var val = li.getAttribute('data-value') || li.textContent;
+            display.textContent = li.textContent;
+            if (hidden) {
+              hidden.value = val;
+              hidden.querySelectorAll('option').forEach(function (o) { o.selected = (o.value === val); });
+              hidden.dispatchEvent(new Event('change'));
+            }
+            cs.classList.remove('open');
+            cs.setAttribute('aria-expanded', 'false');
+            options.setAttribute('aria-hidden', 'true');
+          });
+        });
+
+        cs.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cs.click(); }
+          else if (e.key === 'Escape') {
+            cs.classList.remove('open');
+            cs.setAttribute('aria-expanded', 'false');
+            options.setAttribute('aria-hidden', 'true');
+          }
+        });
+      });
+
+      onClickOutside('.custom-select.open', function (s) {
+        s.classList.remove('open');
+        s.setAttribute('aria-expanded', 'false');
+        var options = s.querySelector('.options');
+        if (options) options.setAttribute('aria-hidden', 'true');
+      });
+
+      /* ---------- CALENDARIO PERSONALIZADO ---------- */
+      function monthName(idx) {
+        return new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(new Date(2000, idx, 1));
+      }
+
+      document.querySelectorAll('.custom-date').forEach(function (cd) {
+        var hidden = cd.parentElement.querySelector('input[type="date"]');
+        var display = cd.querySelector('.date-display');
+        var cal = cd.parentElement.querySelector('.calendar');
+        var monthSelect = cal.querySelector('.month-select');
+        var yearSelect = cal.querySelector('.year-select');
+        var prev = cal.querySelector('.prev');
+        var next = cal.querySelector('.next');
+        var daysContainer = cal.querySelector('.days');
+
+        var today = new Date();
+        var currentYear = today.getFullYear();
+        var startYear = currentYear - 100;
+        var endYear = currentYear + 10;
+
+        // Llenar select de meses
+        monthSelect.innerHTML = '';
+        for (var m = 0; m < 12; m++) {
+          var opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = monthName(m);
+          monthSelect.appendChild(opt);
+        }
+
+        // Llenar select de años
+        yearSelect.innerHTML = '';
+        for (var y = endYear; y >= startYear; y--) {
+          var o = document.createElement('option');
+          o.value = y;
+          o.textContent = y;
+          yearSelect.appendChild(o);
+        }
+
+        var viewYear = hidden && hidden.value ? parseInt(hidden.value.split('-')[0], 10) : today.getFullYear();
+        var viewMonth = hidden && hidden.value ? parseInt(hidden.value.split('-')[1], 10) - 1 : today.getMonth();
+
+        function pad(n) { return n < 10 ? '0' + n : n; }
+
+        function render() {
+          monthSelect.value = String(viewMonth);
+          if (viewYear < startYear) viewYear = startYear;
+          if (viewYear > endYear) viewYear = endYear;
+          yearSelect.value = String(viewYear);
+
+          daysContainer.innerHTML = '';
+          var firstDay = new Date(viewYear, viewMonth, 1).getDay();
+          var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+          // Espacios vacíos
+          for (var i = 0; i < firstDay; i++) {
+            var empty = document.createElement('div');
+            empty.className = 'day empty';
+            daysContainer.appendChild(empty);
+          }
+
+          // Días del mes
+          for (var d = 1; d <= daysInMonth; d++) {
+            var day = document.createElement('div');
+            day.className = 'day';
+            day.textContent = d;
+            day.tabIndex = 0;
+            day.dataset.date = viewYear + '-' + pad(viewMonth + 1) + '-' + pad(d);
+
+            if (hidden && hidden.value === day.dataset.date) day.classList.add('selected');
+
+            day.addEventListener('click', function (e) {
+              e.stopPropagation();
+              var value = this.dataset.date;
+              if (hidden) { hidden.value = value; hidden.dispatchEvent(new Event('input')); }
+              display.textContent = new Intl.DateTimeFormat('es-ES').format(new Date(value));
+              cal.setAttribute('aria-hidden', 'true');
+              cd.classList.remove('open');
+              cd.setAttribute('aria-expanded', 'false');
+              render();
+            });
+
+            daysContainer.appendChild(day);
+          }
+        }
+
+        render();
+
+        // Abrir/cerrar calendario
+        cd.addEventListener('click', function (e) {
+          var isOpen = cd.classList.toggle('open');
+          cd.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          cal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+          if (isOpen) {
+            if (hidden && hidden.value) {
+              var parts = hidden.value.split('-');
+              viewYear = parseInt(parts[0], 10);
+              viewMonth = parseInt(parts[1], 10) - 1;
+            }
+            render();
+          }
+        });
+
+        // Navegación mes anterior/siguiente
+        prev.addEventListener('click', function (e) {
+          e.stopPropagation();
+          viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+          render();
+        });
+        next.addEventListener('click', function (e) {
+          e.stopPropagation();
+          viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+          render();
+        });
+
+        // Cambio de mes/año en selects
+        monthSelect.addEventListener('change', function (e) {
+          viewMonth = parseInt(this.value, 10);
+          render();
+        });
+        yearSelect.addEventListener('change', function (e) {
+          viewYear = parseInt(this.value, 10);
+          render();
+        });
+
+        // Teclado
+        cd.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cd.click(); }
+          else if (e.key === 'Escape') {
+            cal.setAttribute('aria-hidden', 'true');
+            cd.classList.remove('open');
+            cd.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+      });
+
+      // Cerrar calendario al hacer clic fuera
+      onClickOutside('.calendar', function (cal) {
+        var trigger = cal.parentElement.querySelector('.custom-date');
+        if (cal && trigger && !cal.contains(event?.target) && !trigger.contains(event?.target)) {
+          cal.setAttribute('aria-hidden', 'true');
+          trigger.setAttribute('aria-expanded', 'false');
+          trigger.classList.remove('open');
+        }
+      });
+
+    });
+  </script>
+
+
+
+  <!-- CONFIGURACIÓN DE FIREBASE -->
+  <script>
+    /* ========================================
+       🔥 CONFIGURACIÓN DE FIREBASE
+       ========================================
+       IMPORTANTE: Reemplaza estos valores con los de tu proyecto Firebase
+       Los puedes obtener en: Firebase Console > Project Settings > Your apps
+    */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVEltBir1JP3-Fkp28VchL8-r0VMi-LYo",
+      authDomain: "cloudmessage-73de0.firebaseapp.com",
+      projectId: "cloudmessage-73de0",
+      storageBucket: "cloudmessage-73de0.firebasestorage.app",
+      messagingSenderId: "40058388963",
+      appId: "1:40058388963:web:821cda7114279a336e20d6",
+      measurementId: "G-W0BMTSZWXC"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- SCRIPT DE VALIDACIÓN Y ENVÍO AL BACKEND -->
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const errorMsg = document.getElementById('errorMsg');
+      const submitBtn = form.querySelector('.btn');
+
+      // Limpiar errores previos
+      clearErrors();
+      errorMsg.classList.remove('show');
+
+      // Capturar datos del formulario
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      /* ========================================
+         VALIDACIONES
+         ======================================== */
+
+      // 1. Validar nombre
+      if (data.firstName.trim().length < 2) {
+        showError('⚠️ El nombre debe tener al menos 2 caracteres.', ['firstName']);
+        return;
+      }
+
+      // 2. Validar apellido
+      if (data.lastName.trim().length < 2) {
+        showError('⚠️ El apellido debe tener al menos 2 caracteres.', ['lastName']);
+        return;
+      }
+
+      // 3. Validar email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        showError('⚠️ Por favor, ingresa un correo electrónico válido.', ['email']);
+        return;
+      }
+
+      // 4. Validar teléfono (mínimo 10 dígitos)
+      const phoneRegex = /^[0-9]{10,}$/;
+      if (!phoneRegex.test(data.phone.replace(/\s/g, ''))) {
+        showError('⚠️ El teléfono debe tener al menos 10 dígitos.', ['phone']);
+        return;
+      }
+
+      // 5. Validar fecha de nacimiento
+      if (!data.birthdate) {
+        showError('⚠️ Por favor, selecciona tu fecha de nacimiento.', ['birthdate']);
+        return;
+      }
+
+      // 6. Validar género
+      if (!data.gender) {
+        showError('⚠️ Por favor, selecciona tu género.', ['gender']);
+        return;
+      }
+
+      // 7. Validar contraseña
+      if (data.password.length < 6) {
+        showError('⚠️ La contraseña debe tener al menos 6 caracteres.', ['password']);
+        return;
+      }
+
+      // 8. Validar que las contraseñas coincidan
+      if (data.password !== data.confirmPassword) {
+        showError('⚠️ Las contraseñas no coinciden.', ['password', 'confirmPassword']);
+        return;
+      }
+
+      /* ========================================
+         PREPARAR DATOS PARA FIREBASE
+         ======================================== */
+      const userPayload = {
+        nombre: data.firstName.trim(),
+        apellidos: data.lastName.trim(),
+        email: data.email.trim().toLowerCase(),
+        telefono: data.phone.trim(),
+        genero: data.gender,
+        fechaNacimiento: data.birthdate,
+        fechaRegistro: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // Mostrar indicador de carga
+      submitBtn.disabled = true;
+      submitBtn.classList.add('btn-loading');
+      const btnText = submitBtn.textContent;
+      submitBtn.textContent = 'Registrando...';
+
+      try {
+        /* ========================================
+           🔥 REGISTRO CON FIREBASE
+           ======================================== */
+
+        // 1. Crear usuario en Firebase Authentication
+        const userCredential = await auth.createUserWithEmailAndPassword(
+          userPayload.email,
+          data.password.trim()
+        );
+
+        const user = userCredential.user;
+        console.log('✅ Usuario creado en Authentication:', user.uid);
+
+        // 2. Guardar datos adicionales en Firestore
+        await db.collection('users').doc(user.uid).set({
+          nombre: userPayload.nombre,
+          apellidos: userPayload.apellidos,
+          email: userPayload.email,
+          telefono: userPayload.telefono,
+          genero: userPayload.genero,
+          fechaNacimiento: userPayload.fechaNacimiento,
+          fechaRegistro: userPayload.fechaRegistro,
+          rol: 'usuario' // Puedes agregar roles si lo necesitas
+        });
+
+        console.log('✅ Datos guardados en Firestore');
+
+        // 3. Actualizar perfil del usuario (opcional)
+        await user.updateProfile({
+          displayName: `${userPayload.nombre} ${userPayload.apellidos}`
+        });
+
+        console.log('✅ Usuario registrado exitosamente');
+
+        // Mostrar mensaje de éxito
+        showSuccess('✅ ¡Cuenta creada con éxito! Redirigiendo...');
+
+        // Limpiar formulario
+        form.reset();
+        clearCustomSelects();
+
+        // Redirigir al login después de 2 segundos
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+
+      } catch (err) {
+        console.error('❌ Error al registrar:', err);
+
+        // Mensajes de error específicos de Firebase
+        let errorMessage = 'Hubo un problema al crear la cuenta. Por favor, intenta nuevamente.';
+
+        switch (err.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = '⚠️ Este correo electrónico ya está registrado.';
+            showError(errorMessage, ['email']);
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '⚠️ El correo electrónico no es válido.';
+            showError(errorMessage, ['email']);
+            break;
+          case 'auth/weak-password':
+            errorMessage = '⚠️ La contraseña es muy débil. Usa al menos 6 caracteres.';
+            showError(errorMessage, ['password']);
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = '⚠️ Error de conexión. Verifica tu internet.';
+            showError(errorMessage);
+            break;
+          default:
+            showError(err.message || errorMessage);
+        }
+      } finally {
+        // Restaurar botón
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.textContent = btnText;
+      }
+    });
+
+    /* ========================================
+       FUNCIONES AUXILIARES
+       ======================================== */
+
+    // Mostrar error con animación
+    function showError(message, fields = []) {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = message;
+      errorMsg.style.color = '#ff6b6b';
+      errorMsg.classList.add('show');
+
+      // Marcar campos con error
+      fields.forEach(fieldName => {
+        const inputBox = document.querySelector(`[data-field="${fieldName}"]`);
+        if (inputBox) {
+          inputBox.classList.add('error');
+          inputBox.classList.add('shake');
+          setTimeout(() => inputBox.classList.remove('shake'), 150);
+        }
+      });
+
+      // Animar mensaje de error
+      errorMsg.classList.add('shake');
+      setTimeout(() => errorMsg.classList.remove('shake'), 150);
+    }
+
+    // Mostrar éxito
+    function showSuccess(message) {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = message;
+      errorMsg.style.color = '#51cf66';
+      errorMsg.style.background = 'rgba(81, 207, 102, 0.15)';
+      errorMsg.style.borderColor = 'rgba(81, 207, 102, 0.3)';
+      errorMsg.classList.add('show');
+      clearErrors();
+    }
+
+    // Limpiar estados de error
+    function clearErrors() {
+      document.querySelectorAll('.input-box').forEach(box => {
+        box.classList.remove('error', 'success');
+      });
+    }
+
+    // Limpiar selects personalizados
+    function clearCustomSelects() {
+      document.querySelectorAll('.custom-select .selected').forEach(el => {
+        const defaultText = el.closest('.select-box').querySelector('select option[disabled]');
+        if (defaultText) {
+          el.textContent = defaultText.textContent;
+        }
+      });
+      document.querySelectorAll('.custom-date .date-display').forEach(el => {
+        el.textContent = 'Fecha de nacimiento';
+      });
+    }
+  </script>
+
+</body>
+
+</html>

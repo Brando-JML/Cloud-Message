@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandeja de Entrada - CloudMessage</title>
+  <link rel="stylesheet" href="inbox.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  
+  <!-- Estilos adicionales para botones de eliminar -->
+  <style>
+    .btn-delete-email,
+    .btn-delete-sent {
+      background: #d93025;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.2s ease;
+    }
+
+    .btn-delete-email:hover,
+    .btn-delete-sent:hover {
+      background: #c5221f;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .btn-delete-email:active,
+    .btn-delete-sent:active {
+      background: #a50e0e;
+      transform: scale(0.98);
+    }
+
+    .btn-delete-email *,
+    .btn-delete-sent * {
+      pointer-events: none;
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <div class="wrapper correo-wrapper">
+    <header class="header">
+      <div class="header__left">
+        <span class="material-icons">menu</span>
+        <h1 class="app-title">CloudMessage</h1>
+      </div>
+
+      <div class="header__middle">
+        <span class="material-icons">search</span>
+        <input type="text" placeholder="Buscar correo..." />
+      </div>
+
+      <div class="header__right">
+        <div class="user-menu">
+          <span class="material-icons account-circle-btn" id="accountBtn">account_circle</span>
+          
+          <!-- Menú desplegable -->
+          <div class="user-menu-dropdown" id="userMenu">
+            <div class="user-info">
+              <div class="user-name" id="userName">Cargando...</div>
+              <div class="user-email" id="userEmail">Cargando...</div>
+            </div>
+            
+            <div class="menu-option logout" id="logoutBtn">
+              <span class="material-icons">logout</span>
+              <span>Cerrar sesión</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main__body">
+      <aside class="sidebar">
+        <button class="sidebar__compose">
+          <span class="material-icons">edit</span> Redactar
+        </button>
+
+        <div class="sidebarOption sidebarOption__active">
+          <span class="material-icons">inbox</span>
+          <h3>Bandeja de entrada</h3>
+        </div>
+
+        <div class="sidebarOption">
+          <span class="material-icons">send</span>
+          <h3>Enviados</h3>
+        </div>
+
+        <div class="sidebarOption">
+          <span class="material-icons">drafts</span>
+          <h3>Borradores</h3>
+        </div>
+      </aside>
+
+      <!-- Correos recibidos -->
+      <section class="emailList active">
+        <div class="emailList__settings">
+          <h2>Correos recientes</h2>
+        </div>
+
+        <div class="emailList__list">
+          <div class="emailRow">
+            <div class="emailRow__summary">
+              <p class="emailRow__from"><strong>De:</strong> Admin</p>
+              <p class="emailRow__subject"><strong>Asunto:</strong> Bienvenida al sistema</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="emailRow__body hide">
+              <p>¡Hola! Bienvenido al sistema CloudMessage. Aquí podrás enviar, recibir y guardar tus correos
+                fácilmente. Si necesitas ayuda, contáctanos en soporte@cloudmessage.com.</p>
+            </div>
+          </div>
+
+          <div class="emailRow">
+            <div class="emailRow__summary">
+              <p class="emailRow__from"><strong>De:</strong> Sistema</p>
+              <p class="emailRow__subject"><strong>Asunto:</strong> Recordatorio de mantenimiento</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="emailRow__body hide">
+              <p>Este es un recordatorio de que el sistema estará en mantenimiento mañana a las 9:00 AM. Durante ese
+                tiempo no podrás acceder a tu bandeja. Gracias por tu comprensión.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Correos enviados -->
+      <section class="sentList hide">
+        <div class="emailList__settings">
+          <h2>Correos enviados</h2>
+        </div>
+
+        <div class="emailList__list">
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> usuario@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Bienvenida</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Hola, este es un correo de bienvenida al sistema. ¡Esperamos que lo disfrutes!</p>
+            </div>
+          </div>
+
+          <div class="sentRow">
+            <div class="sentRow__summary">
+              <p class="sentRow__to"><strong>Para:</strong> soporte@example.com</p>
+              <p class="sentRow__subject"><strong>Asunto:</strong> Reporte de error</p>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="sentRow__body hide">
+              <p>Se ha detectado un error en la aplicación. Favor de revisarlo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Borradores -->
+      <section class="draftList hide">
+        <div class="emailList__settings">
+          <h2>Borradores</h2>
+        </div>
+
+        <div class="emailList__list">
+          <!-- Borrador 1 -->
+          <div class="draftRow" data-draft-id="1">
+            <div class="draftRow__summary">
+              <div class="draftRow__info">
+                <p class="draftRow__to"><strong>Para:</strong> <span class="draft-to-preview">cliente@example.com</span></p>
+                <p class="draftRow__subject"><strong>Asunto:</strong> <span class="draft-subject-preview">Asunto pendiente</span></p>
+              </div>
+              <span class="material-icons toggle-content">expand_more</span>
+            </div>
+            <div class="draftRow__body hide">
+              <form class="draft-edit-form">
+                <div class="draft-field">
+                  <label>Para:</label>
+                  <input type="email" class="draft-to-input" value="equipo@empresa.com" />
+                </div>
+                <div class="draft-field">
+                  <label>Asunto:</label>
+                  <input type="text" class="draft-subject-input" value="Reporte semanal" />
+                </div>
+                <div class="draft-field">
+                  <label>Mensaje:</label>
+                  <textarea class="draft-message-input">Adjunto el reporte semanal de actividades. Falta adjuntar el archivo final con las estadísticas completas.</textarea>
+                </div>
+
+                <div class="draft-attachments">
+                  <div class="draft-attachments-title">Archivos adjuntos:</div>
+                  <div class="attachment-list">
+                    <div class="attachment-item">
+                      <div class="attachment-info">
+                        <span class="material-icons" style="font-size: 18px;">attach_file</span>
+                        <span class="attachment-name">reporte_borrador.xlsx</span>
+                      </div>
+                      <button type="button" class="btn-remove-attachment">Eliminar</button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-add-attachment">
+                    <span class="material-icons" style="font-size: 16px;">add</span>
+                    Agregar archivo
+                  </button>
+                </div>
+
+                <div class="draft-actions">
+                  <button type="button" class="btn-cancel-draft">Cancelar</button>
+                  <button type="button" class="btn-delete-draft">Eliminar borrador</button>
+                  <button type="button" class="btn-save-draft">Guardar cambios</button>
+                  <button type="button" class="btn-send-draft">Enviar ahora</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Redactar nuevo correo -->
+      <section class="composeSection hide">
+        <div class="emailList__settings">
+          <h2>Nuevo mensaje</h2>
+        </div>
+
+        <form class="compose-form">
+          <div class="compose-field">
+            <label>Para:</label>
+            <input type="email" placeholder="ejemplo@correo.com" class="compose-input" required id="composeTo" />
+          </div>
+
+          <div class="compose-field">
+            <label>Asunto:</label>
+            <input type="text" placeholder="Asunto del mensaje" class="compose-input" required id="composeSubject"/>
+          </div>
+
+          <div class="compose-field">
+            <label>Mensaje:</label>
+            <textarea placeholder="Escribe tu mensaje..." class="compose-textarea" required id="composeMessage"></textarea>
+          </div>
+
+          <div class="compose-attachments">
+            <div class="compose-attachments-title">Archivos adjuntos:</div>
+            <div class="attachment-list"></div>
+            <button type="button" class="btn-add-attachment">
+              <span class="material-icons" style="font-size: 16px;">add</span>
+              Agregar archivo
+            </button>
+          </div>
+
+          <div class="compose-actions">
+            <button type="button" class="btn-cancel-compose">Cancelar</button>
+            <button type="submit" class="btn-send" id="btnSendCompose">Enviar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  
+    <!-- Modal de confirmación -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="material-icons modal-icon">warning</span>
+          <h3 class="modal-title">Confirmar eliminación</h3>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que deseas eliminar este borrador? Esta acción no se puede deshacer.
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-borrador" id="modalBorrador">Borrador</button>
+          <button class="modal-btn modal-btn-cancel" id="modalCancel">Cancelar</button>
+          <button class="modal-btn modal-btn-confirm" id="modalConfirm">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <!--Modal Eliminar-->
+    <div class="modal-overlay" id="modalDeleteOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="material-icons modal-icon" style="color: #d93025;">delete_outline</span>
+          <h3 class="modal-title" id="modalDeleteTitle">Eliminar correo</h3>
+        </div>
+        <div class="modal-body" id="modalDeleteBody">
+          ¿Estás seguro de que deseas eliminar este correo? Esta acción no se puede deshacer.
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-cancel" id="modalDeleteCancel">Cancelar</button>
+          <button class="modal-btn modal-btn-confirm" id="modalDeleteConfirm">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor de notificaciones -->
+    <div id="notificationContainer"></div>
+  </div>
+
+  <!-- Scripts externos organizados -->
+  <script src="mailService.js"></script>
+  <script src="cloudinary-config.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="ui-components.js"></script>
+  <script src="navigation.js"></script>
+  <script src="email-handler.js"></script>
+  <script src="draft-handler.js"></script>
+</body>
+</html>
